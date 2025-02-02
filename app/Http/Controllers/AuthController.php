@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Models\Admin;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -54,4 +56,27 @@ class AuthController extends Controller
         Auth::logout();
         return redirect('/');
     }
+
+    public function login(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+    
+        $admin = Admin::where('email', $request->email)->first();
+    
+        if (!$admin || !Hash::check($request->password, $admin->password)) {
+            return response()->json(['error' => 'Invalid credentials'], 401);
+        }
+    
+        // ✅ Generate an API token
+        $token = $admin->createToken('admin-token')->plainTextToken;
+    
+        return response()->json([
+            'message' => 'Admin logged in successfully',
+            'token' => $token // ✅ Return the token
+        ]);
+    }
+    
 }

@@ -40,6 +40,11 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'admin' => [  // 👈 ADD THIS
+            'driver' => 'session',
+            'provider' => 'admin', // Make sure this matches the provider name below
+        ],
+
     ],
 
     /*
@@ -63,6 +68,11 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
+        ],
+
+        'admin' => [ 
+            'driver' => 'eloquent',
+            'model' => App\Models\Admin::class, 
         ],
 
         // 'users' => [
