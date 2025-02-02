@@ -15,8 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('name')->nullable(); 
             $table->string('email')->unique()->nullable(); 
-            $table->string('oauth_provider'); 
-            $table->string('oauth_id'); 
             $table->timestamps();
         });
     }
