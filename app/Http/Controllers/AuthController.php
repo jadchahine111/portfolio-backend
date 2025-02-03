@@ -13,16 +13,14 @@ class AuthController extends Controller
 {
     public function redirectToGoogle()
     {
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')->stateless()->redirect(); // stateless for API
     }
 
     public function handleGoogleCallback()
     {
         try {
-            // You can remove stateless() if you don't need it
-            $googleUser = Socialite::driver('google')->user();
-    
-    
+            $googleUser = Socialite::driver('google')->stateless()->user(); // stateless for API
+            
             // Check if the user exists in the database
             $user = User::where('email', $googleUser->getEmail())->first();
     
@@ -34,14 +32,19 @@ class AuthController extends Controller
                     'oauth_id' => $googleUser->id,
                 ]);
             }
-            
+
+            // Log the user in without using sessions
             Auth::login($user);
 
-            // Return a JSON response or redirect to another page
+            // Generate a personal access token
+            $token = $user->createToken('GoogleOAuth')->plainTextToken;
+
+            // Return a JSON response with the user and token
             return response()->json([
                 'user' => $user,
+                'token' => $token,
             ], 200);
-    
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Something went wrong, please try again.',
