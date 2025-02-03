@@ -17,19 +17,19 @@ Route::middleware(['auth:admin', 'admin'])->group(function () {
         // Logout 
         Route::post('/logoutAdmin', [AuthController::class, 'logoutAdmin']);
 
-        // Categories
+        // CRUD Categories
         Route::post('/admin/categories', [AdminController::class, 'addCategory']);
         Route::put('/admin/categories/{id}', [AdminController::class, 'updateCategory']);
         Route::get('/admin/categories', [AdminController::class, 'viewCategories']);
         Route::delete('/admin/categories/{id}', [AdminController::class, 'deleteCategory']);
     
-        // Subcategories
+        // CRUD Subcategories
         Route::post('/admin/subcategories', [AdminController::class, 'addSubcategory']);
         Route::put('/admin/subcategories/{id}', [AdminController::class, 'updateSubcategory']);
         Route::get('/admin/subcategories', [AdminController::class, 'viewSubcategories']);
         Route::delete('/admin/subcategories/{id}', [AdminController::class, 'deleteSubcategory']);
     
-        // Blogs
+        // CRUD Blogs
         Route::post('/admin/blogs', [AdminController::class, 'addBlog']);
         Route::put('/admin/blogs/{id}', [AdminController::class, 'updateBlog']);
         Route::get('/admin/blogs', [AdminController::class, 'viewBlogs']);
@@ -43,20 +43,28 @@ Route::middleware(['auth:admin', 'admin'])->group(function () {
 
 // User Routes
 Route::middleware(['auth:api', 'user'])->group(function () {
+
     // Logout 
     Route::post('/logoutUser', [AuthController::class, 'logoutUser']);
 
-    // Like Blogs
+    // Like / Unlike Blogs
+    Route::post('/blogs/{blogId}/like', [LikeController::class, 'likeBlog']);
+    Route::delete('/blogs/{blogId}/unlike', [LikeController::class, 'unlikeBlog']);
 
-    // Remove like from Blog
+    // Like / Unlike Reviews
+    Route::post('/reviews/{reviewId}/like', [LikeController::class, 'likeReview']);
+    Route::delete('/reviews/{reviewId}/unlike', [LikeController::class, 'unlikeReview']);
 
-    // Add a review to a blog
+    // Like / Unlike Replies
+    Route::post('/replies/{replyId}/like', [LikeController::class, 'likeReply']);
+    Route::delete('/replies/{replyId}/unlike', [LikeController::class, 'unlikeReply']);
 
-    // Delete a review from a blog
+    // Add / Delete Reviews
+    Route::post('/blogs/{blogId}/reviews', [ReviewController::class, 'addReview']);
+    Route::delete('/reviews/{reviewId}', [ReviewController::class, 'deleteReview']);
 
-    // Update a review from a blog
-
-
-
+    // Reply to Review / Delete Reply
+    Route::post('/reviews/{reviewId}/reply', [ReviewController::class, 'replyToReview']);
+    Route::delete('/replies/{replyId}', [ReviewController::class, 'deleteReply']);
 
 });
