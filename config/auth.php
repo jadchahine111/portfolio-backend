@@ -40,9 +40,13 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
-        'admin' => [  // 👈 ADD THIS
-            'driver' => 'session',
-            'provider' => 'admin', // Make sure this matches the provider name below
+        'api' => [
+            'driver' => 'sanctum',
+            'provider' => 'users',
+        ],
+        'admin' => [  
+            'driver' => 'sanctum',
+            'provider' => 'admin', 
         ],
 
     ],
@@ -67,7 +71,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\User::class),
+            'model' => App\Models\User::class,
         ],
 
         'admin' => [ 

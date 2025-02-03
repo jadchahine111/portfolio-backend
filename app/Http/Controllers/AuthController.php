@@ -37,7 +37,7 @@ class AuthController extends Controller
             Auth::login($user);
 
             // Generate a personal access token
-            $token = $user->createToken('GoogleOAuth')->plainTextToken;
+            $token = $user->createToken('user-token')->plainTextToken;
 
             // Return a JSON response with the user and token
             return response()->json([
@@ -54,11 +54,41 @@ class AuthController extends Controller
     }
     
 
-    public function logout()
+    public function logoutUser(Request $request)
     {
-        Auth::logout();
-        return redirect('/');
+        try {
+            // Revoke the current user's token
+            $request->user()->currentAccessToken()->delete();
+    
+            return response()->json([
+                'message' => 'User logged out successfully',
+            ], 200);
+    
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Something went wrong, please try again.',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
+
+    public function logoutAdmin(Request $request)
+{
+    try {
+        // Revoke the current admin's token
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'message' => 'Admin logged out successfully',
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'Something went wrong, please try again.',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+}
 
     public function login(Request $request)
     {
