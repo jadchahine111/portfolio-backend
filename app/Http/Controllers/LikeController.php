@@ -10,67 +10,36 @@ use App\Models\Reply;
 
 class LikeController extends Controller
 {
-    // Like a blog
-    public function likeBlog($blogId)
+    public function toggleLike(Request $request, $id)
     {
-        return $this->like(Blog::class, $blogId);
-    }
+        $modelType = $request->route()->getName(); // Get the route name to determine the model
+        $modelClass = $this->getModelClass($modelType);
 
-    //  Unlike a blog
-    public function unlikeBlog($blogId)
-    {
-        return $this->unlike(Blog::class, $blogId);
-    }
-
-    //  Like a review
-    public function likeReview($reviewId)
-    {
-        return $this->like(Review::class, $reviewId);
-    }
-
-    //  Unlike a review
-    public function unlikeReview($reviewId)
-    {
-        return $this->unlike(Review::class, $reviewId);
-    }
-
-    //  Like a reply
-    public function likeReply($replyId)
-    {
-        return $this->like(Reply::class, $replyId);
-    }
-
-    //  Unlike a reply
-    public function unlikeReply($replyId)
-    {
-        return $this->unlike(Reply::class, $replyId);
-    }
-
-    //  Generic Like function
-    private function like($model, $id)
-    {
-        $entity = $model::findOrFail($id);
-
-        if (!$entity->likes()->where('user_id', auth()->id())->exists()) {
-            $entity->likes()->create(['user_id' => auth()->id()]);
-            return response()->json(['message' => 'Liked successfully'], 200);
+        if (!$modelClass) {
+            return response()->json(['message' => 'Invalid request'], 400);
         }
 
-        return response()->json(['message' => 'Already liked'], 400);
-    }
+        $entity = $modelClass::findOrFail($id);
+        $userId = auth()->id();
 
-    // Generic Unlike function
-    private function unlike($model, $id)
-    {
-        $entity = $model::findOrFail($id);
-
-        $like = $entity->likes()->where('user_id', auth()->id())->first();
+        $like = $entity->likes()->where('user_id', $userId)->first();
 
         if ($like) {
             $like->delete();
-            return response()->json(['message' => 'Unliked successfully'], 200);
+            return response()->json(['message' => 'Unliked successfully', 'liked' => false], 200);
+        } else {
+            $entity->likes()->create(['user_id' => $userId]);
+            return response()->json(['message' => 'Liked successfully', 'liked' => true], 200);
         }
+    }
 
-        return response()->json(['message' => 'Not liked yet'], 400);
+    private function getModelClass($routeName)
+    {
+        return match (true) {
+            str_contains($routeName, 'blogs') => Blog::class,
+            str_contains($routeName, 'reviews') => Review::class,
+            str_contains($routeName, 'replies') => Reply::class,
+            default => null
+        };
     }
 }

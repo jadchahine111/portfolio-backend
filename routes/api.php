@@ -3,6 +3,14 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BlogController;
+use App\Http\Controllers\CategoriesController;
+use App\Http\Controllers\LikeController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\SubcategoriesController;
+
+use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\UserMiddleware;
 
 // Admin Authentication
 Route::post('admin/login', [AuthController::class, 'login']);
@@ -13,51 +21,53 @@ Route::get('auth/google/callback', [AuthController::class, 'handleGoogleCallback
 
 
 // Admin routes
-Route::middleware(['auth:admin', 'admin'])->group(function () {
+Route::middleware([AdminMiddleware::class])->group(function () {
         // Logout 
         Route::post('/logoutAdmin', [AuthController::class, 'logoutAdmin']);
 
         // CRUD Categories
-        Route::post('/admin/categories', [AdminController::class, 'addCategory']);
-        Route::put('/admin/categories/{id}', [AdminController::class, 'updateCategory']);
-        Route::get('/admin/categories', [AdminController::class, 'viewCategories']);
-        Route::delete('/admin/categories/{id}', [AdminController::class, 'deleteCategory']);
+        Route::post('/admin/categories', [CategoriesController::class, 'addCategory']);
+        Route::put('/admin/categories/{id}', [CategoriesController::class, 'updateCategory']);
+        Route::get('/admin/categories', [CategoriesController::class, 'viewCategories']);
+        Route::delete('/admin/categories/{id}', [CategoriesController::class, 'deleteCategory']);
     
         // CRUD Subcategories
-        Route::post('/admin/subcategories', [AdminController::class, 'addSubcategory']);
-        Route::put('/admin/subcategories/{id}', [AdminController::class, 'updateSubcategory']);
-        Route::get('/admin/subcategories', [AdminController::class, 'viewSubcategories']);
-        Route::delete('/admin/subcategories/{id}', [AdminController::class, 'deleteSubcategory']);
+        Route::post('/admin/subcategories', [SubcategoriesController::class, 'addSubcategory']);
+        Route::put('/admin/subcategories/{id}', [SubcategoriesController::class, 'updateSubcategory']);
+        Route::get('/admin/subcategories', [SubcategoriesController::class, 'viewSubcategories']);
+        Route::delete('/admin/subcategories/{id}', [SubcategoriesController::class, 'deleteSubcategory']);
     
         // CRUD Blogs
-        Route::post('/admin/blogs', [AdminController::class, 'addBlog']);
-        Route::put('/admin/blogs/{id}', [AdminController::class, 'updateBlog']);
-        Route::get('/admin/blogs', [AdminController::class, 'viewBlogs']);
-        Route::get('/admin/blogs/{id}', [AdminController::class, 'viewBlogById']);
-        Route::delete('/admin/blogs/{id}', [AdminController::class, 'deleteBlog']);
+        Route::post('/admin/blogs', [BlogController::class, 'addBlog']);
+        Route::put('/admin/blogs/{id}', [BlogController::class, 'updateBlog']);
+        Route::get('/admin/blogs/{id}', [BlogController::class, 'viewBlogById']);
+        Route::delete('/admin/blogs/{id}', [BlogController::class, 'deleteBlog']);
 
 
 });
 
+Route::get('/blogs', [BlogController::class, 'viewBlogs']);
+Route::get('/categories', [CategoriesController::class, 'viewCategories']);
+
+
 
 
 // User Routes
-Route::middleware(['auth:api', 'user'])->group(function () {
+Route::middleware([UserMiddleware::class])->group(function () {
 
     // Logout 
     Route::post('/logoutUser', [AuthController::class, 'logoutUser']);
 
     // Like / Unlike Blogs
-    Route::post('/blogs/{blogId}/like', [LikeController::class, 'likeBlog']);
-    Route::delete('/blogs/{blogId}/unlike', [LikeController::class, 'unlikeBlog']);
+    Route::post('/blogs/{blogId}/like-toggle', [LikeController::class, 'toggleLike']);
 
     // Like / Unlike Reviews
-    Route::post('/reviews/{reviewId}/like', [LikeController::class, 'likeReview']);
-    Route::delete('/reviews/{reviewId}/unlike', [LikeController::class, 'unlikeReview']);
+    Route::post('/reviews/{reviewId}/like-toggle', [LikeController::class, 'toggleLike']);
+
+    Route::get('/user/blogs', [BlogController::class, 'viewBlogs']);
 
     // Like / Unlike Replies
-    Route::post('/replies/{replyId}/like', [LikeController::class, 'likeReply']);
-    Route::delete('/replies/{replyId}/unlike', [LikeController::class, 'unlikeReply']);
+    Route::post('/replies/{replyId}/like-toggle', [LikeController::class, 'toggleLike']);
 
     // Add / Delete Reviews
     Route::post('/blogs/{blogId}/reviews', [ReviewController::class, 'addReview']);

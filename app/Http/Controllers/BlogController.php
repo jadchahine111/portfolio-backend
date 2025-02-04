@@ -3,6 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\User;
+use App\Models\Category;
+
+use Illuminate\Support\Facades\Validator; 
+use App\Models\Blog;
 
 class BlogController extends Controller
 {
@@ -44,9 +49,38 @@ class BlogController extends Controller
 
     public function viewBlogs()
     {
-        $blogs = Blog::all();
-        return response()->json(['blogs' => $blogs]);
+        // Eager load the related category and subcategories
+        $blogs = Blog::with(['category', 'category.subcategories'])->get();
+    
+        // Transform each blog into your desired structure
+        $transformedBlogs = $blogs->map(function ($blog) {
+            return [
+                'id'             => $blog->id,
+                'title'          => $blog->title,
+                'category_id'    => $blog->category_id, // from the blog model
+                'excerpt'        => $blog->excerpt,
+                'content'        => $blog->content,
+                'date'           => $blog->date,
+                // Flatten the category into separate fields
+                'category_name'  => $blog->category ? $blog->category->name : null,
+                // Transform subcategories to include only the desired keys
+                'sub_categories' => $blog->category && $blog->category->subcategories 
+                    ? $blog->category->subcategories->map(function ($subcategory) {
+                        return [
+                            'subcategory_id'   => $subcategory->id,
+                            'subcategory_name' => $subcategory->name,
+                        ];
+                    })->toArray()
+                    : [],
+            ];
+        });
+    
+        return response()->json([
+            'blogs' => $transformedBlogs,
+        ]);
     }
+    
+    
 
     public function deleteBlog($id)
     {
