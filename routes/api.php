@@ -55,6 +55,8 @@ Route::get('/categories', [CategoriesController::class, 'viewCategories']);
 // User Routes
 Route::middleware([UserMiddleware::class])->group(function () {
 
+    Route::get('/session', [AuthController::class, 'getSessionData']);
+
     // Logout 
     Route::post('/logoutUser', [AuthController::class, 'logoutUser']);
 
@@ -77,4 +79,17 @@ Route::middleware([UserMiddleware::class])->group(function () {
     Route::post('/reviews/{reviewId}/reply', [ReviewController::class, 'replyToReview']);
     Route::delete('/replies/{replyId}', [ReviewController::class, 'deleteReply']);
 
+});
+
+Route::get('/generate-key', function () {
+    // Generate a 256-bit key (32 bytes)
+    $key = openssl_random_pseudo_bytes(32);
+
+    // Convert the key to hexadecimal format
+    $hexKey = bin2hex($key);
+
+    // Return the key as a JSON response
+    return response()->json([
+        'key' => $hexKey
+    ]);
 });

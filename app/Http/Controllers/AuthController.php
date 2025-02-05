@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Admin;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Crypt;
+
 
 class AuthController extends Controller
 {
@@ -16,35 +19,31 @@ class AuthController extends Controller
         return Socialite::driver('google')->stateless()->redirect(); // stateless for API
     }
 
-    public function handleGoogleCallback()
+
+    public function handleGoogleCallback(Request $request)
     {
         try {
-            $googleUser = Socialite::driver('google')->stateless()->user(); // stateless for API
-            
-            // Check if the user exists in the database
-            $user = User::where('email', $googleUser->getEmail())->first();
+            // Retrieve user from Google via Socialite
+            $googleUser = Socialite::driver('google')->stateless()->user(); // Stateless for API
     
-            // If user doesn't exist, create a new user
-            if (!$user) {
-                $user = User::create([
-                    'name' => $googleUser->name,
-                    'email' => $googleUser->email,
-                    'oauth_id' => $googleUser->id,
-                ]);
-            }
-
-            // Log the user in without using sessions
+            // Check if the user exists in the database, or create a new one
+            $user = User::updateOrCreate(
+                ['google_id' => $googleUser->getId()],
+                [
+                    'name' => $googleUser->getName(),
+                    'email' => $googleUser->getEmail(),
+                ]
+            );
+    
+            // Log the user in
             Auth::login($user);
-
+    
             // Generate a personal access token
             $token = $user->createToken('user-token')->plainTextToken;
-
-            // Return a JSON response with the user and token
-            return response()->json([
-                'user' => $user,
-                'token' => $token,
-            ], 200);
-
+    
+            // Send the encrypted token to the frontend (React)
+            return redirect()->to(env('APP_FRONTEND_URL') . "/auth/callback?token=" . $token);
+    
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Something went wrong, please try again.',
@@ -52,6 +51,36 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
+    public function encryptData($data)
+{
+    // Get the APP_KEY from the environment
+    $key = env('APP_KEY'); // The APP_KEY should be 32 bytes for AES-256
+    if (strlen($key) !== 32) {
+        throw new \Exception('The APP_KEY should be 32 bytes for AES-256');
+    }
+
+    // Generate a 12-byte nonce (IV) for AES-GCM encryption
+    $iv = random_bytes(12);
+
+    // The cipher method used (AES-256-GCM)
+    $cipher = 'aes-256-gcm';
+
+    // Encrypt the data using openssl_encrypt
+    $ciphertext = openssl_encrypt($data, $cipher, $key, OPENSSL_RAW_DATA, $iv, $tag);
+
+    // Check for encryption failure
+    if ($ciphertext === false) {
+        throw new \Exception('Encryption failed.');
+    }
+
+    // Return the IV, ciphertext, and authentication tag encoded in base64
+    return base64_encode($iv . $ciphertext . $tag);
+}
+    
+    
+
+    
     
 
     public function logoutUser(Request $request)

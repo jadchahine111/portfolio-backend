@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name')->nullable(); 
             $table->string('email')->unique()->nullable(); 
+            $table->string("google_id")->nullable();
             $table->timestamps();
         });
     }
