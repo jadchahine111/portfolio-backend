@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Category;
-
+use App\Models\Subcategory; 
 use Illuminate\Support\Facades\Validator; 
 use App\Models\Blog;
 
