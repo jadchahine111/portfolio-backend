@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['GET', 'POST', 'PUT', 'DELETE'],
 
-    'allowed_origins' => ['http://localhost:5173'], // Adjust with your frontend URL
+    'allowed_origins' => ['http://localhost:5173', 'https://jadchahine.me'], // Adjust with your frontend URL
 
     'allowed_origins_patterns' => [],
 
