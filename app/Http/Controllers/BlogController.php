@@ -49,8 +49,8 @@ class BlogController extends Controller
 
     public function viewBlogs()
     {
-        // Eager load the related category and subcategories
-        $blogs = Blog::with(['category', 'category.subcategories'])->get();
+        // Eager load the related category and subcategories (directly from blogs)
+        $blogs = Blog::with(['category', 'subcategories'])->get();
     
         // Transform each blog into your desired structure
         $transformedBlogs = $blogs->map(function ($blog) {
@@ -63,15 +63,13 @@ class BlogController extends Controller
                 'date'           => $blog->date,
                 // Flatten the category into separate fields
                 'category_name'  => $blog->category ? $blog->category->name : null,
-                // Transform subcategories to include only the desired keys
-                'sub_categories' => $blog->category && $blog->category->subcategories 
-                    ? $blog->category->subcategories->map(function ($subcategory) {
-                        return [
-                            'subcategory_id'   => $subcategory->id,
-                            'subcategory_name' => $subcategory->name,
-                        ];
-                    })->toArray()
-                    : [],
+                // Get subcategories directly from the blog
+                'sub_categories' => $blog->subcategories->map(function ($subcategory) {
+                    return [
+                        'subcategory_id'   => $subcategory->id,
+                        'subcategory_name' => $subcategory->name,
+                    ];
+                })->toArray(),
             ];
         });
     

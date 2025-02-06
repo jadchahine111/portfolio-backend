@@ -26,7 +26,7 @@ class Blog extends Model
 
     public function subcategories()
     {
-        return $this->belongsToMany(SubCategory::class, 'blogs_subcategories');
+        return $this->belongsToMany(Subcategory::class, 'blogs_subcategories');
     }
 
     public function likes(): MorphMany
