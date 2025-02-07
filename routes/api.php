@@ -48,6 +48,7 @@ Route::middleware([AdminMiddleware::class])->group(function () {
 
 Route::get('/blogs', [BlogController::class, 'viewBlogs']);
 Route::get('/categories', [CategoriesController::class, 'viewCategories']);
+Route::get('/blogs/{blogId}/reviews/details', [ReviewController::class, 'getReviewsForBlog']);
 
 
 

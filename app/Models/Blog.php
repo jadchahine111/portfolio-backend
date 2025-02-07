@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Blog extends Model
 {
@@ -32,5 +33,10 @@ class Blog extends Model
     public function likes(): MorphMany
     {
         return $this->morphMany(Like::class, 'likeable');
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
     }
 }

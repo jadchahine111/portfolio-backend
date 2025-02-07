@@ -73,4 +73,39 @@ class ReviewController extends Controller
 
         return response()->json(['message' => 'Reply deleted'], 200);
     }
+
+    public function getReviewsForBlog($blogId)
+    {
+        $blog = Blog::findOrFail($blogId);
+    
+        // Eager load additional relationships: 
+        // 'user' for the reviewer, 'likes' for the review's likes,
+        // and for replies: 'user' and 'likes'.
+        $reviews = $blog->reviews()
+                        ->with(['user', 'likes', 'replies.user', 'replies.likes'])
+                        ->get();
+    
+        // Optionally, transform the data to return specific fields.
+        $data = $reviews->map(function ($review) {
+            return [
+                'id'             => $review->id,
+                'content'        => $review->content,
+                'reviewer_email' => $review->user ? $review->user->email : null,
+                'likes_count'    => $review->likes->count(),
+                'created_at'     => $review->created_at,
+                'replies'        => $review->replies->map(function ($reply) {
+                    return [
+                        'id'              => $reply->id,
+                        'content'         => $reply->content,
+                        'replier_email'   => $reply->user ? $reply->user->email : null,
+                        'likes_count'     => $reply->likes->count(),
+                        'created_at'      => $reply->created_at,
+                    ];
+                })->toArray(),
+            ];
+        });
+    
+        return response()->json(['reviews' => $data], 200);
+    }
+    
 }

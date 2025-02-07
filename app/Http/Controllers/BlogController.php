@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Subcategory; 
 use Illuminate\Support\Facades\Validator; 
 use App\Models\Blog;
+use App\Models\Like; 
 
 class BlogController extends Controller
 {
@@ -70,6 +71,7 @@ class BlogController extends Controller
                         'subcategory_name' => $subcategory->name,
                     ];
                 })->toArray(),
+                'likes_count'    => $blog->likes->count(),
             ];
         });
     
