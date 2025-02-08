@@ -146,15 +146,21 @@ class BlogController extends Controller
         if (!$blog) {
             return response()->json(['error' => 'Blog not found'], 404);
         }
-
+    
         // Get the reviews for the blog
         $reviews = Review::with(['likes'])->where('blog_id', $id)->get();
-
+    
         // Transform the blog data with the additional information you want
         $blogData = [
             'id'             => $blog->id,
             'title'          => $blog->title,
             'category_name'  => $blog->category ? $blog->category->name : null,
+            'subcategories'  => $blog->subcategories->map(function ($subcategory) {
+                return [
+                    'id'   => $subcategory->id,
+                    'name' => $subcategory->name,
+                ];
+            })->toArray(), // Add subcategories to the response
             'date'           => $blog->date,
             'content'        => $blog->content,
             'likes_count'    => $blog->likes->count(),
@@ -169,9 +175,10 @@ class BlogController extends Controller
                 ];
             })->toArray(),
         ];
-
+    
         return response()->json([
             'blog' => $blogData,
         ], 200);
     }
+    
 }
