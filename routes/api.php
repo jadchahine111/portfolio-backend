@@ -8,6 +8,7 @@ use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SubcategoriesController;
+use App\Http\Controllers\UserController;
 
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\UserMiddleware;
@@ -48,13 +49,20 @@ Route::middleware([AdminMiddleware::class])->group(function () {
 
 Route::get('/blogs', [BlogController::class, 'viewBlogs']);
 Route::get('/categories', [CategoriesController::class, 'viewCategories']);
-Route::get('/blogs/{blogId}/reviews/details', [ReviewController::class, 'getReviewsForBlog']);
+Route::get('/blogs/{id}', [BlogController::class, 'viewBlogById']);
+
+//UNUSED
+Route::get('/blogs/{blogId}/reviews', [ReviewController::class, 'getReviewsForBlog']);
+
 
 
 
 
 // User Routes
 Route::middleware([UserMiddleware::class])->group(function () {
+
+   
+    Route::get('/user/{userId}/blog/{blogId}/likes', [UserController::class, 'getUserActivities']);
 
     Route::get('/session', [AuthController::class, 'getSessionData']);
 
@@ -69,16 +77,11 @@ Route::middleware([UserMiddleware::class])->group(function () {
 
     Route::get('/user/blogs', [BlogController::class, 'viewBlogs']);
 
-    // Like / Unlike Replies
-    Route::post('/replies/{replyId}/like-toggle', [LikeController::class, 'toggleLike']);
 
     // Add / Delete Reviews
     Route::post('/blogs/{blogId}/reviews', [ReviewController::class, 'addReview']);
     Route::delete('/reviews/{reviewId}', [ReviewController::class, 'deleteReview']);
 
-    // Reply to Review / Delete Reply
-    Route::post('/reviews/{reviewId}/reply', [ReviewController::class, 'replyToReview']);
-    Route::delete('/replies/{replyId}', [ReviewController::class, 'deleteReply']);
 
 });
 

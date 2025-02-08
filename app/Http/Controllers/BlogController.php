@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User;
 use App\Models\Category;
-use App\Models\Subcategory; 
-use Illuminate\Support\Facades\Validator; 
+use App\Models\Subcategory;
+use App\Models\Review;
 use App\Models\Blog;
-use App\Models\Like; 
+use App\Models\Like;
+use Illuminate\Support\Facades\Validator;
 
 class BlogController extends Controller
 {
@@ -60,7 +60,6 @@ class BlogController extends Controller
                 'title'          => $blog->title,
                 'category_id'    => $blog->category_id, // from the blog model
                 'excerpt'        => $blog->excerpt,
-                'content'        => $blog->content,
                 'date'           => $blog->date,
                 // Flatten the category into separate fields
                 'category_name'  => $blog->category ? $blog->category->name : null,
@@ -79,8 +78,6 @@ class BlogController extends Controller
             'blogs' => $transformedBlogs,
         ]);
     }
-    
-    
 
     public function deleteBlog($id)
     {
@@ -89,22 +86,6 @@ class BlogController extends Controller
 
         return response()->json(['message' => 'Blog deleted successfully']);
     }
-
-        public function viewBlogById($id)
-        {
-            // Retrieve the blog by its ID, including its category and subcategories
-            $blog = Blog::with(['category', 'subcategories'])->find($id);
-    
-            // If the blog is not found, return a 404 error
-            if (!$blog) {
-                return response()->json(['error' => 'Blog not found'], 404);
-            }
-    
-            // Return the blog along with its category and subcategories
-            return response()->json([
-                'blog' => $blog,
-            ], 200);
-        }
 
     public function updateBlog(Request $request, $id)
     {
@@ -156,4 +137,41 @@ class BlogController extends Controller
         ], 200);
     }
 
+    public function viewBlogById($id)
+    {
+        // Retrieve the blog by its ID, including its category, subcategories, and the number of likes
+        $blog = Blog::with(['category', 'subcategories', 'likes'])->find($id);
+        
+        // If the blog is not found, return a 404 error
+        if (!$blog) {
+            return response()->json(['error' => 'Blog not found'], 404);
+        }
+
+        // Get the reviews for the blog
+        $reviews = Review::with(['likes'])->where('blog_id', $id)->get();
+
+        // Transform the blog data with the additional information you want
+        $blogData = [
+            'id'             => $blog->id,
+            'title'          => $blog->title,
+            'category_name'  => $blog->category ? $blog->category->name : null,
+            'date'           => $blog->date,
+            'content'        => $blog->content,
+            'likes_count'    => $blog->likes->count(),
+            'comments_count' => $reviews->count(),
+            'reviews'        => $reviews->map(function ($review) {
+                return [
+                    'id'          => $review->id,
+                    'user_name'   => $review->user->name,
+                    'content'     => $review->content,
+                    'created_at'  => $review->created_at,
+                    'likes_count' => $review->likes->count(), // Add likes count for the review
+                ];
+            })->toArray(),
+        ];
+
+        return response()->json([
+            'blog' => $blogData,
+        ], 200);
+    }
 }

@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use App\Models\Like;
 use App\Models\Blog;
 use App\Models\Review;
-use App\Models\Reply;
 
 class LikeController extends Controller
 {
@@ -38,7 +37,6 @@ class LikeController extends Controller
         return match (true) {
             str_contains($routeName, 'blogs') => Blog::class,
             str_contains($routeName, 'reviews') => Review::class,
-            str_contains($routeName, 'replies') => Reply::class,
             default => null
         };
     }
