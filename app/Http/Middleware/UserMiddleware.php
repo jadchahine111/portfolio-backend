@@ -19,7 +19,7 @@ class UserMiddleware
         // Check if the request has a valid token for user
         if ($request->bearerToken()) {
             // Attempt to authenticate the token as a user
-            $user = Auth::guard('api')->user(); // Use API guard for user
+            $user = auth()->user();
 
             // If user is not authenticated, return unauthorized response
             if (!$user) {

@@ -59,10 +59,10 @@ Route::get('/blogs/{blogId}/reviews', [ReviewController::class, 'getReviewsForBl
 
 
 // User Routes
-Route::middleware([UserMiddleware::class])->group(function () {
+Route::middleware(['auth:sanctum'])->group(function () {
 
    
-    Route::get('/user/{userId}/blog/{blogId}/likes', [UserController::class, 'getUserActivities']);
+    Route::get('/user/blog/{blogId}/likes', [UserController::class, 'getUserActivities']);
 
     Route::get('/session', [AuthController::class, 'getSessionData']);
 
