@@ -81,7 +81,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Add / Delete Reviews
     Route::post('/blogs/{blogId}/reviews', [ReviewController::class, 'addReview']);
     Route::delete('/reviews/{reviewId}', [ReviewController::class, 'deleteReview']);
-
+    
+        // Add /check route for checking authentication status
+   
 
 });
 
@@ -97,3 +99,18 @@ Route::get('/generate-key', function () {
         'key' => $hexKey
     ]);
 });
+
+
+
+Route::get('/check', function () {
+    // Check if the user is authenticated
+    if (Auth::check()) {
+        return response()->json(['authenticated' => true]);
+    } else {
+        return response()->json(['authenticated' => false]);
+    }
+});
+
+
+
+
