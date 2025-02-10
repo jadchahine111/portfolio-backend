@@ -69,11 +69,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Logout 
     Route::post('/logoutUser', [AuthController::class, 'logoutUser']);
 
-    // Like / Unlike Blogs
-    Route::post('/blogs/{blogId}/like-toggle', [LikeController::class, 'toggleLike']);
-
-    // Like / Unlike Reviews
-    Route::post('/reviews/{reviewId}/like-toggle', [LikeController::class, 'toggleLike']);
+    // like,unlike blog or review
+    Route::get('/blogs/{blogId}/like-toggle', [LikeController::class, 'toggleLike'])->name('blog.like-toggle');
+    Route::get('/blogs/{blogId}/reviews/{reviewId}/like-toggle', [LikeController::class, 'toggleLike'])->name('review.like-toggle');
 
     Route::get('/user/blogs', [BlogController::class, 'viewBlogs']);
 

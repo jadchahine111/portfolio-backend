@@ -9,35 +9,35 @@ use App\Models\Review;
 
 class LikeController extends Controller
 {
-    public function toggleLike(Request $request, $id)
+    public function toggleLike(Request $request, $blogId, $reviewId = null)
     {
-        $modelType = $request->route()->getName(); // Get the route name to determine the model
-        $modelClass = $this->getModelClass($modelType);
-
-        if (!$modelClass) {
-            return response()->json(['message' => 'Invalid request'], 400);
-        }
-
-        $entity = $modelClass::findOrFail($id);
         $userId = auth()->id();
+        $modelClass = $reviewId ? Review::class : Blog::class;
+        $entityId = $reviewId ?? $blogId;
 
-        $like = $entity->likes()->where('user_id', $userId)->first();
+        // Check if the like already exists
+        $existingLike = Like::where('user_id', $userId)
+            ->where('likeable_id', $entityId)
+            ->where('likeable_type', $modelClass)
+            ->exists();
 
-        if ($like) {
-            $like->delete();
+        if ($existingLike) {
+            // Unlike (delete directly)
+            Like::where('user_id', $userId)
+                ->where('likeable_id', $entityId)
+                ->where('likeable_type', $modelClass)
+                ->delete();
+
             return response()->json(['message' => 'Unliked successfully', 'liked' => false], 200);
-        } else {
-            $entity->likes()->create(['user_id' => $userId]);
-            return response()->json(['message' => 'Liked successfully', 'liked' => true], 200);
         }
-    }
 
-    private function getModelClass($routeName)
-    {
-        return match (true) {
-            str_contains($routeName, 'blogs') => Blog::class,
-            str_contains($routeName, 'reviews') => Review::class,
-            default => null
-        };
+        // Like (insert without loading the entity)
+        Like::create([
+            'user_id' => $userId,
+            'likeable_id' => $entityId,
+            'likeable_type' => $modelClass,
+        ]);
+
+        return response()->json(['message' => 'Liked successfully', 'liked' => true], 200);
     }
 }
