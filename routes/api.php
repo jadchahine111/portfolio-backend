@@ -20,6 +20,8 @@ Route::post('admin/login', [AuthController::class, 'login']);
 Route::get('auth/google', [AuthController::class, 'redirectToGoogle']);
 Route::get('auth/google/callback', [AuthController::class, 'handleGoogleCallback']);
 
+// send email
+Route::post('/contact', [UserController::class, 'sendEmail']);
 
 // Admin routes
 Route::middleware([AdminMiddleware::class])->group(function () {
